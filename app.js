@@ -15,6 +15,8 @@ app.get("/", welcome);
 const movieHandlers = require("./movieHandlers");
 
 app.use(express.json());
+app.delete("/api/users/:id", movieHandlers.deleteUser);
+app.delete("/api/movies/:id", movieHandlers.deleteMovie);
 app.put("/api/users/:id", movieHandlers.updateUser);
 app.put("/api/movies/:id", movieHandlers.updateMovie);
 app.post("/api/users", movieHandlers.postUser);
