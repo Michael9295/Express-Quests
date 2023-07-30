@@ -2,15 +2,13 @@ const database = require("./database");
 
 const updateUser = (req, res) => {
   const id = parseInt(req.params.id);
-  const { name, email, age } = req.body;
+  const { firstname, lastname, email, city, language } = req.body;
 
   database
-    .query("UPDATE users SET name = ?, email = ?, age = ? WHERE id = ?", [
-      name,
-      email,
-      age,
-      id,
-    ])
+    .query(
+      "UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ?",
+      [firstname, lastname, email, city, language, id]
+    )
     .then(([result]) => {
       if (result.affectedRows === 0) {
         res.status(404).send("Not Found");
@@ -23,7 +21,6 @@ const updateUser = (req, res) => {
       res.status(500).send("Error updating the user");
     });
 };
-
 const updateMovie = (req, res) => {
   const id = parseInt(req.params.id);
   const { title, director, year, color, duration } = req.body;
@@ -47,14 +44,13 @@ const updateMovie = (req, res) => {
 };
 
 const postUser = (req, res) => {
-  const { name, email, age } = req.body;
+  const { firstname, lastname, email, city, language } = req.body;
 
   database
-    .query("INSERT INTO users (name, email, age) VALUES (?, ?, ?)", [
-      name,
-      email,
-      age,
-    ])
+    .query(
+      "INSERT INTO users (firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
+      [firstname, lastname, email, city, language]
+    )
     .then(([result]) => {
       res.location(`/api/users/${result.insertId}`).sendStatus(201);
     })
@@ -63,7 +59,6 @@ const postUser = (req, res) => {
       res.status(500).send("Error saving the user");
     });
 };
-
 const getMovies = (req, res) => {};
 
 const postMovie = (req, res) => {
