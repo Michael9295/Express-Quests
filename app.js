@@ -14,6 +14,9 @@ app.get("/", welcome);
 
 const movieHandlers = require("./movieHandlers");
 
+app.use(express.json());
+app.post("/api/users", movieHandlers.postUser);
+app.post("/api/movies", movieHandlers.postMovie);
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.get("/api/users", movieHandlers.getUsers);
