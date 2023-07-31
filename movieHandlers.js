@@ -117,15 +117,47 @@ const postMovie = (req, res) => {
 const getMovieById = (req, res) => {};
 
 const getUsers = (req, res) => {
-  database
-    .query("SELECT * FROM users")
-    .then(([users]) => {
-      res.status(200).json(users);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error retrieving data from database");
-    });
+  const languageParam = req.query.language;
+  const cityParam = req.query.city;
+
+  if (languageParam && cityParam) {
+    database
+      .query("SELECT * FROM users WHERE language = ? AND city = ?", [
+        languageParam,
+        cityParam,
+      ])
+      .then(([users]) => {
+        res.status(200).json(users);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error retrieving data from database");
+      });
+  } else {
+    let query = "SELECT * FROM users WHERE 1=1";
+
+    const queryParams = [];
+
+    if (languageParam) {
+      query += " AND language = ?";
+      queryParams.push(languageParam);
+    }
+
+    if (cityParam) {
+      query += " AND city = ?";
+      queryParams.push(cityParam);
+    }
+
+    database
+      .query(query, queryParams)
+      .then(([users]) => {
+        res.status(200).json(users);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error retrieving data from database");
+      });
+  }
 };
 
 const getUserById = (req, res) => {
