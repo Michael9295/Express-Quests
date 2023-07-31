@@ -95,7 +95,17 @@ const postUser = (req, res) => {
       res.status(500).send("Error saving the user");
     });
 };
-const getMovies = (req, res) => {};
+const getMovies = (req, res) => {
+  database
+    .query("SELECT * FROM movies")
+    .then(([movies]) => {
+      res.status(200).json(movies);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
 
 const postMovie = (req, res) => {
   const { title, director, year, color, duration } = req.body;
@@ -114,7 +124,23 @@ const postMovie = (req, res) => {
     });
 };
 
-const getMovieById = (req, res) => {};
+const getMovieById = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("SELECT * FROM movies WHERE id = ?", [id])
+    .then(([movies]) => {
+      if (movies.length > 0) {
+        res.status(200).json(movies[0]);
+      } else {
+        res.status(404).json({ message: "Not Found" });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
 
 const getUsers = (req, res) => {
   const languageParam = req.query.language;
