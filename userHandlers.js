@@ -82,37 +82,22 @@ const deleteUser = (req, res) => {
 };
 
 const getUsers = (req, res) => {
-  const languageParam = req.query.language;
-  const cityParam = req.query.city;
-
-  if (languageParam && cityParam) {
-    database
-      .query("SELECT * FROM users WHERE language = ? AND city = ?", [
-        languageParam,
-        cityParam,
-      ])
-      .then(([users]) => {
-        res.status(200).json(users);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send("Error retrieving data from database");
-      });
-  } else {
-    let query = "SELECT * FROM users WHERE 1=1";
-
+    const languageParam = req.query.language;
+    const cityParam = req.query.city;
+  
+    let query = "SELECT id, firstname, lastname, email, city, language FROM users WHERE 1=1";
     const queryParams = [];
-
+  
     if (languageParam) {
       query += " AND language = ?";
       queryParams.push(languageParam);
     }
-
+  
     if (cityParam) {
       query += " AND city = ?";
       queryParams.push(cityParam);
     }
-
+  
     database
       .query(query, queryParams)
       .then(([users]) => {
@@ -122,8 +107,7 @@ const getUsers = (req, res) => {
         console.error(err);
         res.status(500).send("Error retrieving data from database");
       });
-  }
-};
+  };
 
 const getUserById = (req, res) => {
     const id = parseInt(req.params.id);
@@ -133,7 +117,7 @@ const getUserById = (req, res) => {
       .then(([users]) => {
         if (users.length > 0) {
           const user = { ...users[0] };
-          delete user.hashedPassword; // Exclure le champ hashedPassword de la réponse
+          delete user.hashedPassword; 
           res.status(200).json(user);
         } else {
           res.status(404).json({ message: "Not Found" });
