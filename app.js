@@ -4,8 +4,8 @@ const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
 const userHandlers = require("./userHandlers");
 const movieHandlers = require("./movieHandlers");
-const authHandlers = require("./auth"); 
-
+const authHandlers = require("./auth");
+const { validateMovie, validateUser } = require("./validators");
 const app = express();
 const port = process.env.APP_PORT || 5000;
 const { hashPassword, verifyPassword, verifyToken } = require("./auth");
@@ -18,15 +18,15 @@ app.get("/", welcome);
 
 app.use(express.json());
 app.post("/api/login", userHandlers.getUserByEmailWithPasswordAndPassToNext, verifyPassword);
-app.post("/api/movies", verifyToken, movieHandlers.postMovie);
-app.post("/api/users", authHandlers.hashPassword, userHandlers.postUser);
+app.post("/api/movies", verifyToken, validateMovie, movieHandlers.postMovie);
+app.post("/api/users", authHandlers.hashPassword, validateUser, userHandlers.postUser);
 
 // Middleware pour vérification du token
 app.use(verifyToken);
 
 // Routes protégées
 app.put("/api/users/:id", authHandlers.hashPassword, userHandlers.updateUser);
-app.delete("/api/users/:id", authHandlers.checkUserId, userHandlers.deleteUser); // Utilisation du middleware checkUserId
+app.delete("/api/users/:id", authHandlers.checkUserId, userHandlers.deleteUser);
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUserById);
 app.put("/api/movies/:id", movieHandlers.updateMovie);
