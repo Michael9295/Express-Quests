@@ -1,6 +1,26 @@
 const argon2 = require('argon2');
 const database = require("./database");
 
+const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
+  const { email } = req.body;
+
+  database
+    .query("select * from users where email = ?", [email])
+    .then(([users]) => {
+      if (users[0] != null) {
+        req.user = users[0];
+
+        next();
+      } else {
+        res.sendStatus(401);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+
 const hashingOptions = {
   type: argon2.argon2id,
   memoryCost: 2 ** 16,
@@ -9,7 +29,7 @@ const hashingOptions = {
 };
 
 const postUser = (req, res) => {
-    const { firstname, lastname, email, city, language, hashedPassword } = req.body; // Utiliser hashedPassword au lieu de password
+    const { firstname, lastname, email, city, language, hashedPassword } = req.body;
   
     database
       .query(
@@ -27,7 +47,7 @@ const postUser = (req, res) => {
 
   const updateUser = (req, res) => {
     const id = parseInt(req.params.id);
-    const { firstname, lastname, email, city, language, hashedPassword } = req.body; // Utiliser hashedPassword au lieu de password
+    const { firstname, lastname, email, city, language, hashedPassword } = req.body;
   
     database
       .query(
@@ -118,4 +138,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserById,
+  getUserByEmailWithPasswordAndPassToNext,
 };

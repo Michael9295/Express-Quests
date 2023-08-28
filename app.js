@@ -1,12 +1,14 @@
 require("dotenv").config();
-
-const { hashPassword } = require("./auth.js");
-const userHandlers = require("./userHandlers"); 
-const movieHandlers = require("./movieHandlers");
-
 const express = require("express");
+const argon2 = require("argon2");
+const jwt = require("jsonwebtoken");
+const userHandlers = require("./userHandlers");
+const movieHandlers = require("./movieHandlers");
+const authHandlers = require("./auth"); 
+
 const app = express();
-const port = process.env.APP_PORT ?? 5000;
+const port = process.env.APP_PORT || 5000;
+const { hashPassword, verifyPassword, verifyToken } = require("./auth");
 
 const welcome = (req, res) => {
   res.send("Welcome to my favourite movie list");
@@ -15,23 +17,23 @@ const welcome = (req, res) => {
 app.get("/", welcome);
 
 app.use(express.json());
+app.post("/api/login", userHandlers.getUserByEmailWithPasswordAndPassToNext, verifyPassword);
+app.post("/api/movies", verifyToken, movieHandlers.postMovie);
+app.post("/api/users", authHandlers.hashPassword, userHandlers.postUser);
 
-app.post("/api/users", hashPassword, userHandlers.postUser);
-app.put("/api/users/:id", hashPassword, userHandlers.updateUser);
-app.delete("/api/users/:id", userHandlers.deleteUser);
+// Middleware pour vérification du token
+app.use(verifyToken);
+
+// Routes protégées
+app.put("/api/users/:id", authHandlers.hashPassword, userHandlers.updateUser);
+app.delete("/api/users/:id", authHandlers.checkUserId, userHandlers.deleteUser); // Utilisation du middleware checkUserId
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUserById);
-
-app.post("/api/movies", movieHandlers.postMovie);
 app.put("/api/movies/:id", movieHandlers.updateMovie);
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 
-app.listen(port, (err) => {
-  if (err) {
-    console.error("Something bad happened");
-  } else {
-    console.log(`Server is listening on ${port}`);
-  }
+app.listen(port, () => {
+  console.log(`Server is listening on ${port}`);
 });
